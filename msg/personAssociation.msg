@@ -1,0 +1,7 @@
+int32 leftLegObject
+string leftLegObjectID
+int32 rightLegObject
+string rightLegObjectID
+float32 associationProbability
+
+

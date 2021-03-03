@@ -1,0 +1,2 @@
+rectangleProperties rectangle
+circleProperties circle
