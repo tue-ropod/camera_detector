@@ -45,11 +45,11 @@ add_message_files(
    FILES
    detection.msg
    detections.msg
-#   personAssociation.msg
-#   person.msg
-#   persons.msg
-#   associationWouter.msg
-#   associationsWouter.msg
+   personAssociation.msg
+   person.msg
+   persons.msg
+   associationWouter.msg
+   associationsWouter.msg
 #   circleProperties.msg
 #   rectangleProperties.msg
 #   objPosVel.msg

@@ -21,6 +21,8 @@ using namespace std;
 struct timeval timeC;
 #include <sstream>
 
+string storageLocation = "/home/nvidia/pictures/";
+
 void detection_processing::display(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr,double timeD)
 {
     try
@@ -36,7 +38,8 @@ void detection_processing::display(const std::shared_ptr<std::vector<std::shared
 //            gettimeofday(&timeC, NULL);
             std::stringstream stream;
             stream << std::fixed << std::setprecision(2) << timeD;
-            string name = "/home/nvidia/pictures/kinectDetection_"  + stream.str() + ".jpg";
+           // string name = "/home/nvidia/pictures/kinectDetection_"  + stream.str() + ".jpg";
+             string name = storageLocation + "kinectDetection_"  + stream.str() + ".jpg";
             cout<<name<<endl;
             cv::imwrite(name,flipImage);
         }
@@ -102,7 +105,11 @@ camera_detector::detection detection_processing::xyzPoints(const auto poseKeypoi
     return m;
 }
 
-void detection_processing::process(const auto poseKeypoints, cv::Mat &rgbd2, camera_detector::detections &detectionData) {
+void detection_processing::process(const auto poseKeypoints, cv::Mat &rgbd2, camera_detector::detections &detectionData, double timeStamp, bool saveDetectionData) {
+
+    std::stringstream timeStream;
+    timeStream << std::fixed << std::setprecision(2) << timeStamp;
+
     camera_detector::detection m;
     const vector<int> all = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24}; // vector with all bodyparts
     for (int person = 0 ; person < poseKeypoints.getSize(0); person++)
@@ -112,6 +119,23 @@ void detection_processing::process(const auto poseKeypoints, cv::Mat &rgbd2, cam
             detectionData.detections.push_back(m);
         }
     }
+
+    if(saveDetectionData)
+    {
+        FILE* fp;
+        string fileName = storageLocation + "positionData_" + timeStream.str() + ".txt";
+        fp = fopen(fileName.c_str(), "w");
+
+        for (int person = 0 ; person < poseKeypoints.getSize(0); person++)
+        {
+            m = xyzPoints(poseKeypoints,person,all,rgbd2);
+            if (m.x>-20 && m.x<20 && m.y>-20 && m.y<20 && m.z>-20 && m.z<20) {
+                fprintf(fp, "%f, %f, %f, %f\n", m.x, m.y, m.z, m.p);
+            }
+        }
+
+        fclose(fp);
+    }
 }
 
 void detection_processing::toXYZ(point &p, double thetaH, double thetaV, double dist) {
@@ -120,7 +144,7 @@ void detection_processing::toXYZ(point &p, double thetaH, double thetaV, double 
     p.z = sin(thetaV)*dist;
 }
 
-void detection_processing::processKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr,cv::Mat &rgbd2,camera_detector::detections &detectionData)
+void detection_processing::processKeypoints(const std::shared_ptr<std::vector<std::shared_ptr<op::Datum>>>& datumsPtr,cv::Mat &rgbd2,camera_detector::detections &detectionData, double timeStamp, bool saveDetectionData)
 {
     try
     {
@@ -128,7 +152,7 @@ void detection_processing::processKeypoints(const std::shared_ptr<std::vector<st
         {
             // Accesing each element of the keypoints
             const auto& poseKeypoints = datumsPtr->at(0)->poseKeypoints;
-            process(poseKeypoints,rgbd2,detectionData);
+            process(poseKeypoints,rgbd2,detectionData, timeStamp, saveDetectionData);
         }
         else
             op::log("Nullptr or empty datumsPtr found.", op::Priority::High);

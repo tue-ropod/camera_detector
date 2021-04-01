@@ -21,6 +21,8 @@ using namespace std;
 // Custom OpenPose flags
 DEFINE_bool(no_display,                 false,
             "Enable to disable the visual display.");
+DEFINE_bool(saveDetectionData,          false,
+            "Enable to store the detection data.");
 DEFINE_bool(do_print,                 false,
             "Disable to disable the visual display.");
 DEFINE_string(net_size,                 "288x160",
@@ -45,7 +47,6 @@ void sigint_handler(int s)
 
 bool protonect_paused = false;
 libfreenect2::Freenect2Device *devtopause;
-
 
 /// [main]
 int main(int argc, char *argv[])
@@ -364,8 +365,8 @@ int main(int argc, char *argv[])
         auto datumProcessed = opWrapper.emplaceAndPop(newrgbmat);
         if (datumProcessed != nullptr)
         {
+            ros::Time stamp = ros::Time::now();
             if (!FLAGS_no_display) {
-                ros::Time stamp = ros::Time::now();
                 dp.display(datumProcessed,stamp.toNSec());            // plots keypoints on top of picture
               usleep(0.0001);
 //                cv::imshow("depth", depthmat / 4096.0f); // plots depth data in black/white picture
@@ -378,7 +379,17 @@ int main(int argc, char *argv[])
               }
             }
 //            persons.persons.clear();
-            dp.processKeypoints(datumProcessed,rgbd2,detectionData);       // prints keypoints in command window
+            // TODO check if writing to file required
+            detectionData.header.stamp.nsec = stamp.sec;
+            detectionData.header.stamp.sec = stamp.nsec;
+            detectionData.header.frame_id = "/Jetson";
+            if (FLAGS_saveDetectionData) {
+                dp.processKeypoints(datumProcessed,rgbd2,detectionData, stamp.toNSec(), true);
+            } else {
+                dp.processKeypoints(datumProcessed,rgbd2,detectionData, stamp.toNSec(), false);
+            }
+
+                   // prints keypoints in command window
         }
 
 
