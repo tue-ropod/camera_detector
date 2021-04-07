@@ -8,8 +8,8 @@ using namespace std;
 #include "geometry_msgs/TransformStamped.h"
 #include "geometry_msgs/Pose.h"
 #include <visualization_msgs/MarkerArray.h>
-#include <camera_detector/associationsWouter.h>
-#include <camera_detector/persons.h>
+#include <hip_msgs/associationsWouter.h>
+#include <hip_msgs/persons.h>
 #include "ed_gui_server/objsPosVel.h"
 #include "tf/transform_listener.h"
 #include <tf2/LinearMath/Quaternion.h>
@@ -20,7 +20,7 @@ using namespace std;
 /// [headers]
 
 
-void createLineAssociations(ed_gui_server::objsPosVel& objsInfo,int i, int j, visualization_msgs::Marker &marker, camera_detector::personAssociation pA) {
+void createLineAssociations(ed_gui_server::objsPosVel& objsInfo,int i, int j, visualization_msgs::Marker &marker, hip_msgs::personAssociation pA) {
     double dx,dy,dz,xL,yL,zL,xR,yR,zR, dist;
     double t3,t2,t1;
 
@@ -65,9 +65,9 @@ void createLineAssociations(ed_gui_server::objsPosVel& objsInfo,int i, int j, vi
 
 
 
-camera_detector::persons personsStore;
+hip_msgs::persons personsStore;
 
-void storeData(const camera_detector::persons& persons)
+void storeData(const hip_msgs::persons& persons)
 {
     personsStore=persons;
 }

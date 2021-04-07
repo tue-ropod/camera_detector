@@ -18,6 +18,7 @@ using namespace std;
 #include <openpose/flags.hpp>
 #include <openpose/headers.hpp>
 
+
 // Custom OpenPose flags
 DEFINE_bool(no_display,                 false,
             "Enable to disable the visual display.");
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 ////    sub2 = n.subscribe("/clock", 3, showData2);
 //    pub2 = n.advertise<camera_detector::detections>("rawCameraDetections",3);
 //    //    visualization_msgs::MarkerArray markerArray;
-    objDetections_pub = n.advertise<camera_detector::detections>("/Jetson/cameraDetections",3);
+    objDetections_pub = n.advertise<hip_msgs::detections>("/Jetson/cameraDetections",3);
     indx_pub = n.advertise<std_msgs::Float32>("/Jetson/indx",3);
     indy_pub = n.advertise<std_msgs::Float32>("/Jetson/indy",3);
 //    objAssociations_pub = n.advertise<visualization_msgs::MarkerArray>("/Jetson/LRFAssociations",3);
@@ -94,7 +95,7 @@ int main(int argc, char *argv[])
 //    marker.action = visualization_msgs::Marker::ADD;
 
 //    //    }
-    camera_detector::detections detectionData;
+    hip_msgs::detections detectionData;
 //    //    ed_gui_server::objsPosVel objsInfo;
 //    //    ed_gui_server::objsPosVel objsInfo2;
 //    //    geometry_msgs ropodPosition;
@@ -324,7 +325,7 @@ int main(int argc, char *argv[])
     libfreenect2::Frame undistorted(512, 424, 4), registered(512, 424, 4), depth2rgb(1920, 1080 + 2, 4); // check here (https://github.com/OpenKinect/libfreenect2/issues/337) and here (https://github.com/OpenKinect/libfreenect2/issues/464) why depth2rgb image should be bigger
     //! [registration setup]
 
-    cv::Mat rgbmat, depthmat, newrgbmat, rgbd2;
+    cv::Mat rgbmat, depthmat, newrgbmat, rgbd2, rgbmatTest, depthmatTest;
     double sum_freq,single_freq = 0;
 //    const string target_frame = "/ropod_tue_2/laser/scan";
 //    const string base_frame = "/map";
@@ -349,10 +350,20 @@ int main(int argc, char *argv[])
 
 
         // convert kinect data to cv mat, which is useable for openpose
-        cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmat);
-        cv::Mat(depth->height, depth->width, CV_32FC1, depth->data).copyTo(depthmat);
+//        cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmatTest);
+        cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmatTest);
+        cv::Mat(depth->height, depth->width, CV_32FC1, depth->data).copyTo(depthmatTest);
+
+        // Rotate when kinect upside down
+        cv::flip(rgbmatTest, rgbmat, -1);
+        cv::flip(depthmatTest, depthmat, -1);
+
         cv::resize(rgbmat, rgbmat, cv::Size(), 0.25, 0.25); // resize image, no effect on speed
         cv::cvtColor(rgbmat, newrgbmat, CV_BGRA2RGB);     // transform four channel to RGB (delete alpha layer)
+
+//        cv::Mat flipImageTest;
+//        cv::flip(rgbmatTest, rgbmat,0);
+//        cv::imshow("depth2RGBsize", flipImageTest / 4096.0f);
 
         clock_t begin = clock();
 

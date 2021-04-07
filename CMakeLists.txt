@@ -26,6 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   #geometry_msgs
   message_generation
+  hip_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -43,13 +44,13 @@ add_message_files(
    DIRECTORY
    msg
    FILES
-   detection.msg
-   detections.msg
-   personAssociation.msg
-   person.msg
-   persons.msg
-   associationWouter.msg
-   associationsWouter.msg
+#   detection.msg
+#   detections.msg
+#   personAssociation.msg
+#   person.msg
+#   persons.msg
+#   associationWouter.msg
+#   associationsWouter.msg
 #   circleProperties.msg
 #   rectangleProperties.msg
 #   objPosVel.msg
@@ -77,7 +78,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES camera_detector
- CATKIN_DEPENDS roscpp std_msgs tf message_runtime
+ CATKIN_DEPENDS roscpp std_msgs tf message_runtime hip_msgs
 #  DEPENDS system_lib
 )
 
