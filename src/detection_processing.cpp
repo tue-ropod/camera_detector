@@ -22,6 +22,38 @@ struct timeval timeC;
 #include <sstream>
 #include <openpose/pose/poseParameters.hpp>
 
+/* Pose output
+As mentioned at https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/02_output.md
+ Result for BODY_25 (25 body parts consisting of COCO + foot)
+ const std::map<unsigned int, std::string> POSE_BODY_25_BODY_PARTS {
+     {0,  "Nose"},
+     {1,  "Neck"},
+     {2,  "RShoulder"},
+     {3,  "RElbow"},
+     {4,  "RWrist"},
+     {5,  "LShoulder"},
+     {6,  "LElbow"},
+     {7,  "LWrist"},
+     {8,  "MidHip"},
+     {9,  "RHip"},
+     {10, "RKnee"},
+     {11, "RAnkle"},
+     {12, "LHip"},
+     {13, "LKnee"},
+     {14, "LAnkle"},
+     {15, "REye"},
+     {16, "LEye"},
+     {17, "REar"},
+     {18, "LEar"},
+     {19, "LBigToe"},
+     {20, "LSmallToe"},
+     {21, "LHeel"},
+     {22, "RBigToe"},
+     {23, "RSmallToe"},
+     {24, "RHeel"},
+     {25, "Background"}
+ };
+ */
 const auto& poseBodyPartMappingBody25 = op::getPoseBodyPartMapping(op::PoseModel::BODY_25);
 
 string storageLocation = "/home/nvidia/pictures/";
@@ -145,42 +177,6 @@ hip_msgs::detection detection_processing::xyzPoints(const auto poseKeypoints,aut
     return m;
 }
 
-
-/* Pose output
-As mentioned at https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/02_output.md
-
-
- Result for BODY_25 (25 body parts consisting of COCO + foot)
- const std::map<unsigned int, std::string> POSE_BODY_25_BODY_PARTS {
-     {0,  "Nose"},
-     {1,  "Neck"},
-     {2,  "RShoulder"},
-     {3,  "RElbow"},
-     {4,  "RWrist"},
-     {5,  "LShoulder"},
-     {6,  "LElbow"},
-     {7,  "LWrist"},
-     {8,  "MidHip"},
-     {9,  "RHip"},
-     {10, "RKnee"},
-     {11, "RAnkle"},
-     {12, "LHip"},
-     {13, "LKnee"},
-     {14, "LAnkle"},
-     {15, "REye"},
-     {16, "LEye"},
-     {17, "REar"},
-     {18, "LEar"},
-     {19, "LBigToe"},
-     {20, "LSmallToe"},
-     {21, "LHeel"},
-     {22, "RBigToe"},
-     {23, "RSmallToe"},
-     {24, "RHeel"},
-     {25, "Background"}
- };
- */
-
 void detection_processing::process(const auto poseKeypoints, cv::Mat &rgbd2, hip_msgs::detections &detectionData, double timeStamp, bool saveDetectionData) {
 
     std::stringstream timeStream;
@@ -229,6 +225,11 @@ void detection_processing::processKeypoints(const std::shared_ptr<std::vector<st
         if (datumsPtr != nullptr && !datumsPtr->empty())
         {
             // Accesing each element of the keypoints
+            /** poseKeypoints (from https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/core/datum.hpp)
+            * Body pose (x,y,score) locations for each person in the image.
+            * It has been resized to the desired output resolution (e.g., `resolution` flag in the demo).
+            * Size: #people x #body parts (e.g., 18 for COCO or 15 for MPI) x 3 ((x,y) coordinates + score)
+            */
             const auto& poseKeypoints = datumsPtr->at(0)->poseKeypoints;
             process(poseKeypoints,rgbd2,detectionData, timeStamp, saveDetectionData);
         }
