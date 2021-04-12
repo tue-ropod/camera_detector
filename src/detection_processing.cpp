@@ -93,6 +93,9 @@ hip_msgs::detection detection_processing::xyzPoints(const auto poseKeypoints,aut
                 thetaH = (indx/resH-0.5)*thetaHKinect/180.0*M_PI;
                 thetaV = -(indy/resV-0.5)*thetaVKinect/180.0*M_PI;
                 toXYZ(pTemp, thetaH, thetaV, dist);
+
+//std::cout << "detection processing: bodyprt = " << bodyPart << " thetaH = " << thetaH << " thetaV = " << thetaV << " dist = " << dist << " xyz = " << pTemp.x << ", " << pTemp.y << ", " << pTemp.z << std::endl;
+
                 x = x+pTemp.x;
                 y = y+pTemp.y;
                 z = z+pTemp.z;
@@ -129,7 +132,7 @@ hip_msgs::detection detection_processing::xyzPoints(const auto poseKeypoints,aut
                     y = pTemp.y;
                     z = pTemp.z;
                     p = poseKeypoints[vector<int> {person, bodyPart, 2}];
-                    fprintf(fp, "%s, %f, %f, %f, %f\n",poseBodyPartMappingBody25.at(bodyPart).c_str(),  x, y, z, p);
+//                    fprintf(fp, "%s, %f, %f, %f, %f\n",poseBodyPartMappingBody25.at(bodyPart).c_str(),  x, y, z, p);
                 } else {
                     fprintf(fp, "%s skipped, dist = %f\n",poseBodyPartMappingBody25.at(bodyPart).c_str(), dist);
                 }
@@ -217,6 +220,9 @@ void detection_processing::process(const auto poseKeypoints, cv::Mat &rgbd2, hip
 }
 
 void detection_processing::toXYZ(point &p, double thetaH, double thetaV, double dist) {
+    thetaH = -thetaH;
+//    thetaV = -thetaV;
+
     p.x = cos(thetaH)*cos(thetaV)*dist;
     p.y = sin(thetaH)*cos(thetaV)*dist;
     p.z = sin(thetaV)*dist;

@@ -36,7 +36,7 @@ DEFINE_bool(no_ROS,                 false,
 #include <camera_detector/kinectDetector.h>
 /// [headers]
 
-
+#define CAMERA_UPSIDEDOWN
 
 
 bool protonect_shutdown = false; ///< Whether the running application should shut down.
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
     libfreenect2::Frame undistorted(512, 424, 4), registered(512, 424, 4), depth2rgb(1920, 1080 + 2, 4); // check here (https://github.com/OpenKinect/libfreenect2/issues/337) and here (https://github.com/OpenKinect/libfreenect2/issues/464) why depth2rgb image should be bigger
     //! [registration setup]
 
-    cv::Mat rgbmat, depthmat, newrgbmat, rgbd2, rgbmatTest, depthmatTest;
+    cv::Mat rgbmat, depthmat, newrgbmat, rgbd2, rgbmatTest, depthmatTest, depthMathConverted;
     double sum_freq,single_freq = 0;
 //    const string target_frame = "/ropod_tue_2/laser/scan";
 //    const string base_frame = "/map";
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
 //    string fileName= "associationData" + IDMeasurement + ".csv";
 //    storefile.open(fileName);
 //    int time_count=0;
-
+int cntr = 0;
     /// [loop start]
     while(n.ok())
     {
@@ -350,13 +350,18 @@ int main(int argc, char *argv[])
 
 
         // convert kinect data to cv mat, which is useable for openpose
-//        cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmatTest);
+#ifdef CAMERA_UPSIDEDOWN
         cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmatTest);
         cv::Mat(depth->height, depth->width, CV_32FC1, depth->data).copyTo(depthmatTest);
 
         // Rotate when kinect upside down
         cv::flip(rgbmatTest, rgbmat, -1);
         cv::flip(depthmatTest, depthmat, -1);
+#else
+        cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmat);
+        cv::Mat(depth->height, depth->width, CV_32FC1, depth->data).copyTo(depthmat);
+#endif
+
 
         cv::resize(rgbmat, rgbmat, cv::Size(), 0.25, 0.25); // resize image, no effect on speed
         cv::cvtColor(rgbmat, newrgbmat, CV_BGRA2RGB);     // transform four channel to RGB (delete alpha layer)
@@ -380,9 +385,20 @@ int main(int argc, char *argv[])
             if (!FLAGS_no_display) {
                 dp.display(datumProcessed,stamp.toNSec());            // plots keypoints on top of picture
               usleep(0.0001);
-//                cv::imshow("depth", depthmat / 4096.0f); // plots depth data in black/white picture
-                cv::Mat flipImage;
-                cv::flip(rgbd2, flipImage,1);
+
+               // cv::imshow("depth", depthmat / 4096.0f); // plots depth data in black/white picture
+//		depthmat.convertTo(depthMathConverted,CV_8UC1);
+//                cv::imwrite("/home/nvidia/pictures/depth"+to_string(cntr)+ ".jpg", depthMathConverted); // plots depth data in black/white picture
+cntr++;
+
+
+//                cv::Mat flipImage;
+#ifdef CAMERA_UPSIDEDOWN
+                cv::flip(rgbd2, rgbd2,-1);
+#endif
+
+//                cv::imwrite("/home/nvidia/pictures/fliprgbd2"+to_string(cntr)+ ".jpg", rgbd2/4096.0f); // lots depth data in black/white picture
+
 //                cv::imshow("depth2RGBsize", flipImage / 4096.0f);
               int key = cv::waitKey(1);
               if (key==27) { // stop program if esc key is pressed
