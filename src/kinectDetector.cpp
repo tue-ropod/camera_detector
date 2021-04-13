@@ -407,13 +407,13 @@ cntr++;
             }
 //            persons.persons.clear();
             // TODO check if writing to file required
-            detectionData.header.stamp.nsec = stamp.sec;
-            detectionData.header.stamp.sec = stamp.nsec;
+            detectionData.header.stamp.nsec = stamp.nsec;
+            detectionData.header.stamp.sec = stamp.sec;
             detectionData.header.frame_id = "/Jetson";
             if (FLAGS_saveDetectionData) {
-                dp.processKeypoints(datumProcessed,rgbd2,detectionData, stamp.toNSec(), true);
+                dp.processKeypoints(datumProcessed,rgbd2,detectionData, stamp.toSec(), true);
             } else {
-                dp.processKeypoints(datumProcessed,rgbd2,detectionData, stamp.toNSec(), false);
+                dp.processKeypoints(datumProcessed,rgbd2,detectionData, stamp.toSec(), false);
             }
 
                    // prints keypoints in command window

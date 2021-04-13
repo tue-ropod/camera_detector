@@ -216,7 +216,7 @@ void detection_processing::process(const auto poseKeypoints, cv::Mat &rgbd2, hip
 }
 
 void detection_processing::toXYZ(point &p, double thetaH, double thetaV, double dist) {
-    thetaH = -thetaH;
+//    thetaH = -thetaH;
 //    thetaV = -thetaV;
 
     p.x = cos(thetaH)*cos(thetaV)*dist;
